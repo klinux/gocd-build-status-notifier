@@ -13,10 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-rootProject.name = 'gocd-build-status-notifier'
-include 'common'
-include 'github-pr-status'
-include 'stash-pr-status'
-include 'gerrit-cs-status'
-include 'gitlab-mr-status'
-include 'bitbucket-pr-status'
+
+package com.tw.go.plugin;
+
+import com.thoughtworks.go.plugin.api.annotation.Extension;
+import com.tw.go.plugin.provider.Provider;
+import com.tw.go.plugin.provider.StashProvider;
+
+@Extension
+public class StashBuildStatusNotifierPlugin extends BuildStatusNotifierPlugin {
+    @Override
+    protected Provider loadProvider() {
+        try {
+            return new StashProvider();
+        } catch (Exception e) {
+            throw new RuntimeException("could not create provider", e);
+        }
+    }
+}
