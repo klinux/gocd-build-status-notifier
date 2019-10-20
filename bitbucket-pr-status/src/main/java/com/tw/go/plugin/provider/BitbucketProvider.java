@@ -29,9 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StashProvider extends DefaultProvider {
-    public static final String PLUGIN_ID = "stash.pr.status";
-    public static final String STASH_PR_POLLER_PLUGIN_ID = "stash.pr";
+public class BitbucketProvider extends DefaultProvider {
+    public static final String PLUGIN_ID = "bitbucket.pr.status";
+    public static final String BITBUCKET_PR_POLLER_PLUGIN_ID = "git.fb";
 
     public static final String IN_PROGRESS_STATE = "INPROGRESS";
     public static final String SUCCESSFUL_STATE = "SUCCESSFUL";
@@ -39,12 +39,12 @@ public class StashProvider extends DefaultProvider {
 
     private HTTPClient httpClient;
 
-    public StashProvider() {
+    public BitbucketProvider() {
         super(new DefaultPluginConfigurationView());
         httpClient = new HTTPClient();
     }
 
-    public StashProvider(HTTPClient httpClient) {
+    public BitbucketProvider(HTTPClient httpClient) {
         super(new DefaultPluginConfigurationView());
         this.httpClient = httpClient;
     }
@@ -56,7 +56,7 @@ public class StashProvider extends DefaultProvider {
 
     @Override
     public String pollerPluginId() {
-        return STASH_PR_POLLER_PLUGIN_ID;
+        return BITBUCKET_PR_POLLER_PLUGIN_ID;
     }
 
     @Override
@@ -67,13 +67,13 @@ public class StashProvider extends DefaultProvider {
         String passwordToUse = pluginSettings.getPassword();
 
         if (StringUtils.isEmpty(endPointToUse)) {
-            endPointToUse = System.getProperty("go.plugin.build.status.stash.endpoint");
+            endPointToUse = System.getProperty("go.plugin.build.status.bitbucket.endpoint");
         }
         if (StringUtils.isEmpty(usernameToUse)) {
-            usernameToUse = System.getProperty("go.plugin.build.status.stash.username");
+            usernameToUse = System.getProperty("go.plugin.build.status.bitbucket.username");
         }
         if (StringUtils.isEmpty(passwordToUse)) {
-            passwordToUse = System.getProperty("go.plugin.build.status.stash.password");
+            passwordToUse = System.getProperty("go.plugin.build.status.bitnucket.password");
         }
 
         String updateURL = String.format("%s/rest/build-status/1.0/commits/%s", endPointToUse, revision);

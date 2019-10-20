@@ -27,9 +27,9 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class StashProviderTest {
+public class BitbucketProviderTest {
     DefaultPluginSettings pluginSettings;
-    StashProvider provider;
+    BitbucketProvider provider;
 
     @Before
     public void setUp() throws Exception {
@@ -38,15 +38,15 @@ public class StashProviderTest {
         pluginSettings.setUsername("test");
         pluginSettings.setPassword("Stash");
 
-        provider = new StashProvider();
+        provider = new BitbucketProvider();
     }
 
     @Test
     public void shouldGetStateFromResult() {
-        assertThat(provider.getState("Unknown"), is(StashProvider.IN_PROGRESS_STATE));
-        assertThat(provider.getState("Passed"), is(StashProvider.SUCCESSFUL_STATE));
-        assertThat(provider.getState("Failed"), is(StashProvider.FAILED_STATE));
-        assertThat(provider.getState("Cancelled"), is(StashProvider.FAILED_STATE));
+        assertThat(provider.getState("Unknown"), is(BitbucketProvider.IN_PROGRESS_STATE));
+        assertThat(provider.getState("Passed"), is(BitbucketProvider.SUCCESSFUL_STATE));
+        assertThat(provider.getState("Failed"), is(BitbucketProvider.FAILED_STATE));
+        assertThat(provider.getState("Cancelled"), is(BitbucketProvider.FAILED_STATE));
     }
 
     @Ignore("for local runs")

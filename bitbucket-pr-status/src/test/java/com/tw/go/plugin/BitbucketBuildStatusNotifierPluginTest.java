@@ -22,8 +22,8 @@ import com.thoughtworks.go.plugin.api.request.DefaultGoPluginApiRequest;
 import com.thoughtworks.go.plugin.api.request.GoApiRequest;
 import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest;
 import com.thoughtworks.go.plugin.api.response.DefaultGoApiResponse;
+import com.tw.go.plugin.provider.BitbucketProvider;
 import com.tw.go.plugin.provider.Provider;
-import com.tw.go.plugin.provider.StashProvider;
 import com.tw.go.plugin.setting.PluginConfigurationView;
 import com.tw.go.plugin.setting.PluginSettings;
 import com.tw.go.plugin.util.JSONUtils;
@@ -44,7 +44,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class StashBuildStatusNotifierPluginTest {
+public class BitbucketBuildStatusNotifierPluginTest {
     public static final String PLUGIN_ID = "stash";
     public static final String POLLER_PLUGIN_ID = "stash-repo-poller-plugin-id";
     @Mock
@@ -58,7 +58,7 @@ public class StashBuildStatusNotifierPluginTest {
     public void setUp() {
         initMocks(this);
 
-        plugin = new StashBuildStatusNotifierPlugin();
+        plugin = new BitbucketBuildStatusNotifierPlugin();
 
         DefaultGoApiResponse pluginSettingsResponse = new DefaultGoApiResponse(200);
         pluginSettingsResponse.setResponseBody(JSONUtils.toJSON(new HashMap<String, String>()));
@@ -213,7 +213,7 @@ public class StashBuildStatusNotifierPluginTest {
 
     @Test
     public void shouldReturnCorrectConfigForStashPlugin() throws Exception {
-        plugin.setProvider(new StashProvider());
+        plugin.setProvider(new BitbucketProvider());
 
         Map<String, Object> configuration = new Gson().fromJson(plugin.handle(createRequest(PLUGIN_SETTINGS_GET_CONFIGURATION)).responseBody(), Map.class);
 

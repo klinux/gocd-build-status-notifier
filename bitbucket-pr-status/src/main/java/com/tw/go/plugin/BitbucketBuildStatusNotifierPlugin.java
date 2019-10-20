@@ -17,15 +17,15 @@
 package com.tw.go.plugin;
 
 import com.thoughtworks.go.plugin.api.annotation.Extension;
+import com.tw.go.plugin.provider.BitbucketProvider;
 import com.tw.go.plugin.provider.Provider;
-import com.tw.go.plugin.provider.StashProvider;
 
 @Extension
-public class StashBuildStatusNotifierPlugin extends BuildStatusNotifierPlugin {
+public class BitbucketBuildStatusNotifierPlugin extends BuildStatusNotifierPlugin {
     @Override
     protected Provider loadProvider() {
         try {
-            return new StashProvider();
+            return new BitbucketProvider();
         } catch (Exception e) {
             throw new RuntimeException("could not create provider", e);
         }
