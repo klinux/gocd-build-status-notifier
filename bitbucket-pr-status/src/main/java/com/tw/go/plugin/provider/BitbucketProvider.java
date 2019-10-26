@@ -60,8 +60,8 @@ public class BitbucketProvider extends DefaultProvider {
     }
 
     @Override
-    public void updateStatus(String url, PluginSettings pluginSettings, String branch, String revision, String pipelineStage,
-                             String result, String trackbackURL) throws Exception {
+    public void updateStatus(String url, PluginSettings pluginSettings, String branch, String revision,
+                             String pipelineStage, String result, String trackbackURL) throws Exception {
         String endPointToUse = pluginSettings.getEndPoint();
         String usernameToUse = pluginSettings.getUsername();
         String passwordToUse = pluginSettings.getPassword();
@@ -76,7 +76,7 @@ public class BitbucketProvider extends DefaultProvider {
             passwordToUse = System.getProperty("go.plugin.build.status.bitnucket.password");
         }
 
-        String updateURL = String.format("%s/rest/build-status/1.0/commits/%s", endPointToUse, revision);
+        String updateURL = String.format("%s/2.0/repositories/%s/1.0/commit/%s/statuses/build", endPointToUse, revision);
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("state", getState(result));
@@ -85,8 +85,9 @@ public class BitbucketProvider extends DefaultProvider {
         params.put("url", trackbackURL);
         params.put("description", "");
         String requestBody = new GsonBuilder().create().toJson(params);
+        String accessToken = httpClient.getToken(AuthenticationType.BASIC, usernameToUse, passwordToUse);
 
-        httpClient.postRequest(updateURL, AuthenticationType.BASIC, usernameToUse, passwordToUse, requestBody);
+        httpClient.postRequest(updateURL, accessToken, requestBody);
     }
 
     @Override

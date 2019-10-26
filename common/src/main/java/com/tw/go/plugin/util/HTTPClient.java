@@ -32,23 +32,17 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 import java.net.URI;
 
 public class HTTPClient {
-    public String getRequest(String getURL, AuthenticationType authenticationType, String username, String password) throws Exception {
+    public String getRequest(String getURL, String accessToken) throws Exception {
         CloseableHttpClient httpClient = null;
         try {
             HttpGet request = new HttpGet(getURL);
-
-            HttpHost target = getHttpHost(getURL);
-            AuthCache authCache = getAuthCache(authenticationType, target);
             HttpClientContext localContext = HttpClientContext.create();
-            localContext.setAuthCache(authCache);
-
-            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(new AuthScope(target), new UsernamePasswordCredentials(username, password));
-            httpClient = HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).build();
+            httpClient = HttpClients.custom().build();
 
             HttpResponse response = httpClient.execute(request, localContext);
             int statusCode = response.getStatusLine().getStatusCode();
@@ -67,21 +61,14 @@ public class HTTPClient {
         }
     }
 
-    public void postRequest(String updateURL, AuthenticationType authenticationType, String username, String password, String requestBody) throws Exception {
+    public void postRequest(String updateURL, String accessToken, String requestBody) throws Exception {
         CloseableHttpClient httpClient = null;
         try {
             HttpPost request = new HttpPost(updateURL);
             request.addHeader("content-type", "application/json");
             request.setEntity(new StringEntity(requestBody));
-
-            HttpHost target = getHttpHost(updateURL);
-            AuthCache authCache = getAuthCache(authenticationType, target);
             HttpClientContext localContext = HttpClientContext.create();
-            localContext.setAuthCache(authCache);
-
-            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(new AuthScope(target), new UsernamePasswordCredentials(username, password));
-            httpClient = HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).build();
+            httpClient = HttpClients.custom().build();
 
             HttpResponse response = httpClient.execute(request, localContext);
             int statusCode = response.getStatusLine().getStatusCode();
@@ -97,6 +84,50 @@ public class HTTPClient {
                 }
             }
         }
+    }
+
+    public String getToken(AuthenticationType authenticationType, String accessKey, String secretKey) throws Exception {
+        CloseableHttpClient httpClient = null;
+
+        String accessToken;
+        String requestBody = "grant_type=client_credentials";
+        String updateURL = "https://bitbucket.org/site/oauth2/access_token";
+
+        try {
+            HttpPost request = new HttpPost(updateURL);
+            request.addHeader("content-type", "application/x-www-form-urlencoded");
+            request.setEntity(new StringEntity(requestBody));
+
+            HttpHost target = getHttpHost(updateURL);
+            AuthCache authCache = getAuthCache(authenticationType, target);
+            HttpClientContext localContext = HttpClientContext.create();
+            localContext.setAuthCache(authCache);
+
+            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(new AuthScope(target), new UsernamePasswordCredentials(accessKey, secretKey));
+            httpClient = HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).build();
+
+            HttpResponse response = httpClient.execute(request, localContext);
+
+            JSONObject jsonObject = new JSONObject(response.getEntity().toString());
+            Object obj = jsonObject.get("access_token");
+
+            accessToken = obj.toString();
+
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode > 204) {
+                throw new RuntimeException("Error occurred. Status Code: " + statusCode);
+            }
+        } finally {
+            if (httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+        }
+        return accessToken;
     }
 
     private HttpHost getHttpHost(String url) throws Exception {
