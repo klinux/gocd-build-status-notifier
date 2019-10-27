@@ -16,7 +16,6 @@
 
 package com.tw.go.plugin.util;
 
-import com.google.gson.Gson;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;

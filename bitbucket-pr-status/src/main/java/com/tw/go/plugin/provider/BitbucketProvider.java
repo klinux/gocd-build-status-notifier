@@ -18,8 +18,6 @@ package com.tw.go.plugin.provider;
 
 import com.google.gson.GsonBuilder;
 import com.thoughtworks.go.plugin.api.logging.Logger;
-import com.tw.go.plugin.BuildStatusNotifierPlugin;
-import com.tw.go.plugin.provider.DefaultProvider;
 import com.tw.go.plugin.setting.DefaultPluginConfigurationView;
 import com.tw.go.plugin.setting.PluginSettings;
 import com.tw.go.plugin.util.AuthenticationType;
