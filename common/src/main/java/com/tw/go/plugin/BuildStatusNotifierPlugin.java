@@ -150,6 +150,7 @@ public abstract class BuildStatusNotifierPlugin implements GoPlugin {
             String pipelineInstance = String.format("%s/%s/%s/%s", pipeline.get("name"), pipeline.get("counter"), stage.get("name"), stage.get("counter"));
             String trackbackURL = String.format("%s/go/pipelines/%s", serverBaseURLToUse, pipelineInstance);
             String result = (String) stage.get("result");
+            LOGGER.info("Pipeline infos: " + pipeline.toString());
 
             List<Map> materialRevisions = (List<Map>) pipeline.get("build-cause");
             for (Map materialRevision : materialRevisions) {

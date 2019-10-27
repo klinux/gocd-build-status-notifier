@@ -80,8 +80,8 @@ public class BitbucketProvider extends DefaultProvider {
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("state", getState(result));
-        params.put("key", pipelineStage);
-        params.put("name", pipelineStage);
+        params.put("key", branch);
+        params.put("name", branch);
         params.put("url", trackbackURL);
         params.put("description", "");
         String requestBody = new GsonBuilder().create().toJson(params);
