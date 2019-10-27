@@ -16,6 +16,7 @@
 
 package com.tw.go.plugin.util;
 
+import com.google.gson.Gson;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -35,14 +36,22 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import java.net.URI;
+import java.util.Map;
 
 public class HTTPClient {
-    public String getRequest(String getURL, String accessToken) throws Exception {
+    public String getRequest(String getURL, AuthenticationType authenticationType, String username, String password) throws Exception {
         CloseableHttpClient httpClient = null;
         try {
             HttpGet request = new HttpGet(getURL);
+
+            HttpHost target = getHttpHost(getURL);
+            AuthCache authCache = getAuthCache(authenticationType, target);
             HttpClientContext localContext = HttpClientContext.create();
-            httpClient = HttpClients.custom().build();
+            localContext.setAuthCache(authCache);
+
+            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(new AuthScope(target), new UsernamePasswordCredentials(username, password));
+            httpClient = HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).build();
 
             HttpResponse response = httpClient.execute(request, localContext);
             int statusCode = response.getStatusLine().getStatusCode();
@@ -61,14 +70,21 @@ public class HTTPClient {
         }
     }
 
-    public void postRequest(String updateURL, String accessToken, String requestBody) throws Exception {
+    public void postRequest(String updateURL, AuthenticationType authenticationType, String username, String password, String requestBody) throws Exception {
         CloseableHttpClient httpClient = null;
         try {
             HttpPost request = new HttpPost(updateURL);
             request.addHeader("content-type", "application/json");
             request.setEntity(new StringEntity(requestBody));
+
+            HttpHost target = getHttpHost(updateURL);
+            AuthCache authCache = getAuthCache(authenticationType, target);
             HttpClientContext localContext = HttpClientContext.create();
-            httpClient = HttpClients.custom().build();
+            localContext.setAuthCache(authCache);
+
+            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(new AuthScope(target), new UsernamePasswordCredentials(username, password));
+            httpClient = HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).build();
 
             HttpResponse response = httpClient.execute(request, localContext);
             int statusCode = response.getStatusLine().getStatusCode();
@@ -86,12 +102,38 @@ public class HTTPClient {
         }
     }
 
-    public String getToken(AuthenticationType authenticationType, String accessKey, String secretKey) throws Exception {
+    public void postBitbucketRequest(String updateURL, String accessToken, String requestBody) throws Exception {
+        CloseableHttpClient httpClient = null;
+        try {
+            HttpPost request = new HttpPost(updateURL);
+            request.addHeader("content-type", "application/json");
+            request.addHeader("authorization", "Bearer " + accessToken);
+            request.setEntity(new StringEntity(requestBody));
+            HttpClientContext localContext = HttpClientContext.create();
+            httpClient = HttpClients.custom().build();
+
+            HttpResponse response = httpClient.execute(request, localContext);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode > 201) {
+                throw new RuntimeException("Error occurred. Status Code: " + statusCode);
+            }
+        } finally {
+            if (httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+        }
+    }
+
+    public String getBitBucketToken(String url, AuthenticationType authenticationType, String accessKey, String secretKey) throws Exception {
         CloseableHttpClient httpClient = null;
 
         String accessToken;
         String requestBody = "grant_type=client_credentials";
-        String updateURL = "https://bitbucket.org/site/oauth2/access_token";
+        String updateURL = url;
 
         try {
             HttpPost request = new HttpPost(updateURL);
@@ -109,15 +151,14 @@ public class HTTPClient {
 
             HttpResponse response = httpClient.execute(request, localContext);
 
-            JSONObject jsonObject = new JSONObject(response.getEntity().toString());
-            Object obj = jsonObject.get("access_token");
-
-            accessToken = obj.toString();
-
             int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode > 204) {
+            if (statusCode > 400) {
                 throw new RuntimeException("Error occurred. Status Code: " + statusCode);
             }
+
+            String responseJSON = EntityUtils.toString(response.getEntity(), "UTF-8");
+            JSONObject jsonObj = new JSONObject(responseJSON);
+            accessToken = jsonObj.get("access_token").toString();
         } finally {
             if (httpClient != null) {
                 try {

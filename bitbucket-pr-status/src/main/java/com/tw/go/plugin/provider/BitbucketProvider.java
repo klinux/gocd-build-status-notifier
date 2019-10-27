@@ -17,6 +17,8 @@
 package com.tw.go.plugin.provider;
 
 import com.google.gson.GsonBuilder;
+import com.thoughtworks.go.plugin.api.logging.Logger;
+import com.tw.go.plugin.BuildStatusNotifierPlugin;
 import com.tw.go.plugin.provider.DefaultProvider;
 import com.tw.go.plugin.setting.DefaultPluginConfigurationView;
 import com.tw.go.plugin.setting.PluginSettings;
@@ -36,6 +38,7 @@ public class BitbucketProvider extends DefaultProvider {
     public static final String IN_PROGRESS_STATE = "INPROGRESS";
     public static final String SUCCESSFUL_STATE = "SUCCESSFUL";
     public static final String FAILED_STATE = "FAILED";
+    private static Logger LOGGER = Logger.getLoggerFor(BitbucketProvider.class);
 
     private HTTPClient httpClient;
 
@@ -65,6 +68,7 @@ public class BitbucketProvider extends DefaultProvider {
         String endPointToUse = pluginSettings.getEndPoint();
         String usernameToUse = pluginSettings.getUsername();
         String passwordToUse = pluginSettings.getPassword();
+        String authURL = "https://bitbucket.org/site/oauth2/access_token";
 
         if (StringUtils.isEmpty(endPointToUse)) {
             endPointToUse = System.getProperty("go.plugin.build.status.bitbucket.endpoint");
@@ -76,18 +80,36 @@ public class BitbucketProvider extends DefaultProvider {
             passwordToUse = System.getProperty("go.plugin.build.status.bitnucket.password");
         }
 
-        String updateURL = String.format("%s/2.0/repositories/%s/1.0/commit/%s/statuses/build", endPointToUse, revision);
+        String updateURL = String.format("%s/2.0/repositories/%s/commit/%s/statuses/build", endPointToUse,
+                parseRepositoryName(url), revision);
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("state", getState(result));
-        params.put("key", branch);
-        params.put("name", branch);
+        params.put("key", pipelineStage);
+        params.put("name", pipelineStage);
         params.put("url", trackbackURL);
         params.put("description", "");
         String requestBody = new GsonBuilder().create().toJson(params);
-        String accessToken = httpClient.getToken(AuthenticationType.BASIC, usernameToUse, passwordToUse);
+        String accessToken = httpClient.getBitBucketToken(authURL, AuthenticationType.BASIC, usernameToUse, passwordToUse);
 
-        httpClient.postRequest(updateURL, accessToken, requestBody);
+        httpClient.postBitbucketRequest(updateURL, accessToken, requestBody);
+    }
+
+    public String parseRepositoryName(String repository) {
+        String[] tempArray;
+        String tempSlug;
+        String owner;
+        String repoSlug;
+        String delimiter = "/";
+        String slugDelimiter = "\\.";
+
+        tempArray = repository.split(delimiter);
+        tempSlug = tempArray[4].split(slugDelimiter)[0];
+
+        owner = tempArray[3];
+        repoSlug = tempSlug;
+
+        return owner + "/" + repoSlug;
     }
 
     @Override

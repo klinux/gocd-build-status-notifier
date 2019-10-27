@@ -16,12 +16,14 @@
 
 package com.tw.go.plugin;
 
+import com.thoughtworks.go.plugin.api.GoApplicationAccessor;
 import com.thoughtworks.go.plugin.api.annotation.Extension;
 import com.tw.go.plugin.provider.BitbucketProvider;
 import com.tw.go.plugin.provider.Provider;
 
 @Extension
 public class BitbucketBuildStatusNotifierPlugin extends BuildStatusNotifierPlugin {
+
     @Override
     protected Provider loadProvider() {
         try {
