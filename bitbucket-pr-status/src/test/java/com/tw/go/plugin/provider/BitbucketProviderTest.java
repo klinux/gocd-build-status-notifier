@@ -46,7 +46,7 @@ public class BitbucketProviderTest {
         assertThat(provider.getState("Unknown"), is(BitbucketProvider.IN_PROGRESS_STATE));
         assertThat(provider.getState("Passed"), is(BitbucketProvider.SUCCESSFUL_STATE));
         assertThat(provider.getState("Failed"), is(BitbucketProvider.FAILED_STATE));
-        assertThat(provider.getState("Cancelled"), is(BitbucketProvider.FAILED_STATE));
+        assertThat(provider.getState("Cancelled"), is(BitbucketProvider.CANCELED_STATE));
     }
 
     @Ignore("for local runs")
