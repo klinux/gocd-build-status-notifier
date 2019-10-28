@@ -36,6 +36,7 @@ public class BitbucketProvider extends DefaultProvider {
     public static final String IN_PROGRESS_STATE = "INPROGRESS";
     public static final String SUCCESSFUL_STATE = "SUCCESSFUL";
     public static final String FAILED_STATE = "FAILED";
+    public static final String CANCELED_STATE = "STOPPED";
     private static Logger LOGGER = Logger.getLoggerFor(BitbucketProvider.class);
 
     private HTTPClient httpClient;
@@ -81,12 +82,30 @@ public class BitbucketProvider extends DefaultProvider {
         String updateURL = String.format("%s/2.0/repositories/%s/commit/%s/statuses/build", endPointToUse,
                 parseRepositoryName(url), revision);
 
+        String description;
+        switch(getState(result)) {
+            case "IN_PROGRESS_STATE":
+                description = "The build is in progress.";
+                break;
+            case "SUCCESSFUL_STATE":
+                description = "The build looks good.";
+                break;
+            case "FAILED_STATE":
+                description = "The build has failed.";
+                break;
+            case "CANCELED_STATE":
+                description = "The build was canceled.";
+                break;
+            default:
+                description = "We don't know about the statuses.";
+        }
+
         Map<String, String> params = new HashMap<String, String>();
         params.put("state", getState(result));
         params.put("key", pipelineStage);
-        params.put("name", pipelineStage);
+        params.put("name", pipelineStage + " » " + branch);
         params.put("url", trackbackURL);
-        params.put("description", "");
+        params.put("description", description);
         String requestBody = new GsonBuilder().create().toJson(params);
         String accessToken = httpClient.getBitBucketToken(authURL, AuthenticationType.BASIC, usernameToUse, passwordToUse);
 
@@ -123,7 +142,7 @@ public class BitbucketProvider extends DefaultProvider {
         } else if (result.equalsIgnoreCase("Failed")) {
             state = FAILED_STATE;
         } else if (result.equalsIgnoreCase("Cancelled")) {
-            state = FAILED_STATE;
+            state = CANCELED_STATE;
         }
         return state;
     }
