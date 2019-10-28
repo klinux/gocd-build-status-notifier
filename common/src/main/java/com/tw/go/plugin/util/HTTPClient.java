@@ -107,7 +107,7 @@ public class HTTPClient {
             HttpPost request = new HttpPost(updateURL);
             request.addHeader("content-type", "application/json");
             request.addHeader("authorization", "Bearer " + accessToken);
-            request.setEntity(new StringEntity(requestBody));
+            request.setEntity(new StringEntity(requestBody, "UTF-8"));
             HttpClientContext localContext = HttpClientContext.create();
             httpClient = HttpClients.custom().build();
 

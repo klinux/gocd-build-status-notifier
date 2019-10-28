@@ -100,7 +100,7 @@ public class BitbucketProvider extends DefaultProvider {
                 description = "We don't know about the statuses.";
         }
 
-        String name = pipelineStage + " >> " + branch;
+        String name = pipelineStage +  " \u00BB " + branch;
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("state", getState(result));
