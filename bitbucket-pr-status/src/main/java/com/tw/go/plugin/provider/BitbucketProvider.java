@@ -100,7 +100,7 @@ public class BitbucketProvider extends DefaultProvider {
                 description = "We don't know about the statuses.";
         }
 
-        String name = pipelineStage + " &raquo; " + branch;
+        String name = pipelineStage + " >> " + branch;
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("state", getState(result));
@@ -109,6 +109,7 @@ public class BitbucketProvider extends DefaultProvider {
         params.put("url", trackbackURL);
         params.put("description", description);
         String requestBody = new GsonBuilder().create().toJson(params);
+        LOGGER.info("Body: " + requestBody);
 
         String accessToken = httpClient.getBitBucketToken(authURL, AuthenticationType.BASIC, usernameToUse, passwordToUse);
 
