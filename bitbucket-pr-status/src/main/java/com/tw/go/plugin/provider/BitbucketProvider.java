@@ -84,32 +84,39 @@ public class BitbucketProvider extends DefaultProvider {
 
         String description;
         switch(getState(result)) {
-            case "IN_PROGRESS_STATE":
+            case IN_PROGRESS_STATE:
                 description = "The build is in progress.";
                 break;
-            case "SUCCESSFUL_STATE":
-                description = "The build looks good.";
+            case SUCCESSFUL_STATE:
+                description = "This commit looks good.";
                 break;
-            case "FAILED_STATE":
-                description = "The build has failed.";
+            case FAILED_STATE:
+                description = "This commit has failed.";
                 break;
-            case "CANCELED_STATE":
+            case CANCELED_STATE:
                 description = "The build was canceled.";
                 break;
             default:
                 description = "We don't know about the statuses.";
         }
 
+        String name = pipelineStage + " &raquo; " + branch;
+
         Map<String, String> params = new HashMap<String, String>();
         params.put("state", getState(result));
         params.put("key", pipelineStage);
-        params.put("name", pipelineStage + " » " + branch);
+        params.put("name", name);
         params.put("url", trackbackURL);
         params.put("description", description);
         String requestBody = new GsonBuilder().create().toJson(params);
+
         String accessToken = httpClient.getBitBucketToken(authURL, AuthenticationType.BASIC, usernameToUse, passwordToUse);
 
-        httpClient.postBitbucketRequest(updateURL, accessToken, requestBody);
+        if (accessToken.isEmpty()) {
+            LOGGER.error("It is not possible to get access token.");
+        } else {
+            httpClient.postBitbucketRequest(updateURL, accessToken, requestBody);
+        }
     }
 
     public String parseRepositoryName(String repository) {
