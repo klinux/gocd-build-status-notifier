@@ -102,7 +102,7 @@ public class BitbucketProvider extends DefaultProvider {
         String slugDelimiter = "\\.";
 
         tempArray = repository.split(delimiter);
-        tempSlug = tempArray[4].split(slugDelimiter)[0];
+        tempSlug = tempArray[tempArray.length -1].split(slugDelimiter)[0];
 
         owner = tempArray[3];
         repoSlug = tempSlug;
