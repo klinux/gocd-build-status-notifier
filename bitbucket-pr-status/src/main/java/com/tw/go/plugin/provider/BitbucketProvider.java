@@ -102,9 +102,16 @@ public class BitbucketProvider extends DefaultProvider {
 
         String name = pipelineStage +  " \u00BB " + branch;
 
+        String key;
+        if (pipelineStage.length() > 40) {
+            key = pipelineStage.substring(0, 40);
+        } else {
+            key = pipelineStage;
+        }
+
         Map<String, String> params = new HashMap<String, String>();
         params.put("state", getState(result));
-        params.put("key", pipelineStage);
+        params.put("key", key);
         params.put("name", name);
         params.put("url", trackbackURL);
         params.put("description", description);
